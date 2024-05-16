@@ -1,0 +1,273 @@
+#!/bin/bash
+clear
+echo ""
+read -r -p "Username for archlinux installation: " username </dev/tty
+echo ""
+read -r -p "Password for archlinux installation: " password </dev/tty
+echo "User Name: $username"
+echo "Password: $password"
+yes | pkg update
+yes | pkg install tur-repo x11-repo 
+yes | pkg update 
+yes | pkg install pulseaudio wget termux-x11-nightly proot proot-distro termux-api virglrenderer-android
+pd install archlinux
+#SETUP USER 
+pd login archlinux --shared-tmp -- /bin/bash -c '
+pacman -Syu --noconfirm
+pacman -S sudo --noconfirm --needed
+useradd -Ng wheel --create-home --no-log-init '$username'
+( echo '$password' ; echo '$password' ) | passwd '$username' 
+#DISABLE PASSWORD
+sed -i "s/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/g" /etc/sudoers
+exit 0'
+
+pd login --user $username archlinux --shared-tmp -- /bin/bash -c '
+sudo pacman --noconfirm --needed -S gvfs exo garcon thunar thunar-volman tumbler xfce4-panel xfce4-session xfce4-settings xfce4-terminal xfconf xfdesktop xfwm4 git wget neovim base-devel jq firefox libxml2 mousepad go && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si --noconfirm && yay -S ulauncher --noconfirm ; cd ~/ ; rm -rf ~/yay
+
+mkdir -p ~/Desktop
+cp -f /usr/share/applications/firefox.desktop ~/Desktop/firefox.desktop
+mkdir -p ~/.config/autostart
+cp -f /usr/share/applications/ulauncher.desktop ~/.config/autostart/ulauncher.desktop
+
+mkdir -p ~/.config/nvim
+wget https://raw.githubusercontent.com/nvim-lua/kickstart.nvim/master/init.lua -P ~/.config/nvim
+#INSTALL WINDOW MANAGER THEME
+git clone https://github.com/rafacuevas3/dots-theme
+mkdir -p ~/.themes
+yes | mv -n ~/dots-theme/* ~/.themes
+rm -rf ~/dots-theme &
+#DOWNLOAD THEME
+git clone https://github.com/Fausto-Korpsvart/Gruvbox-GTK-Theme
+mkdir -p ~/.themes
+mkdir -p ~/.config/ulauncher/user-themes
+yes | mv -n ~/Gruvbox-GTK-Theme/extra/ulauncher/* ~/.config/ulauncher/user-themes
+yes | mv -n ~/Gruvbox-GTK-Theme/themes/* ~/.themes
+mkdir -p ~/.icons
+yes | mv -n ~/Gruvbox-GTK-Theme/icons/* ~/.icons
+rm -rf ~/Gruvbox-GTK-Theme
+#ENABLE PASSWORD
+sed -i "s/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/g" /etc/sudoers
+sed -i "s/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/g" /etc/sudoers
+#SET THEMES AND LOOK
+mkdir -p ~/.config/autostart
+
+wget https://gitlab.com/exorcist365/wallpapers/-/raw/master/gruvbox/pacman-ghosts.jpg -O /usr/share/backgrounds/pacman.jpg
+mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml
+rm -rf ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+cat > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml <<-ENDOFLINE
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-desktop" version="1.0">
+<property name="backdrop" type="empty">
+<property name="screen0" type="empty">
+<property name="monitorscreen" type="empty">
+<property name="workspace0" type="empty">
+<property name="color-style" type="int" value="0"/>
+<property name="image-style" type="int" value="5"/>
+<property name="last-image" type="string" value="/usr/share/backgrounds/pacman.jpg"/>
+</property>
+</property>
+</property>
+</property>
+<property name="last" type="empty">
+<property name="window-width" type="int" value="611"/>
+<property name="window-height" type="int" value="626"/>
+</property>
+<property name="desktop-icons" type="empty">
+<property name="file-icons" type="empty">
+<property name="show-filesystem" type="bool" value="false"/>
+</property>
+</property>
+</channel>
+ENDOFLINE
+
+
+
+cat > ~/setthemes <<-EOM
+xfconf-query -c xfwm4 -p /general/theme -s "Dots Black"
+xfconf-query -c xsettings -p /Net/ThemeName -s "Gruvbox-Dark-BL"
+xfconf-query -c xsettings -p /Net/IconThemeName -s "Gruvbox_Dark"
+xfconf-query -c xfce4-panel -p /panels/panel-1/size -t "uint" -s 36 -n
+xfconf-query -c xfce4-panel -p /panels/panel-1/icon-size -t "uint" -s 0 -n
+xfconf-query -c xfce4-panel -p /plugins/plugin-1/show-button-title -t "bool" -s false -n
+xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-icon -t "string" -s "archlinux-logo" -n
+xfconf-query -c xfwm4 -p /general/workspace_count -s 1
+xfconf-query -c xfce4-panel -p /plugins/plugin-2/show-labels -t "bool" -s false -n
+xfconf-query -c xfce4-panel -p /panels/panel-1/position -t "string" -s "p=8;x=0;y=3000" -n
+xfconf-query -c xfce4-panel -p /panels/panel-2/position -t "string" -s "p=9;x=795;y=30" -n
+xfconf-query -c xfce4-desktop -p /desktop-icons/file-icons/show-filesystem -t "bool" -s false
+
+
+cat > ~/.config/ulauncher/settings.json <<-ENDF
+{
+    "blacklisted-desktop-dirs": "/usr/share/locale:/usr/share/app-install:/usr/share/kservices5:/usr/share/fk5:/usr/share/kservicetypes5:/usr/share/applications/screensavers:/usr/share/kde4:/usr/share/mimelnk",
+    "clear-previous-query": true,
+    "disable-desktop-filters": false,
+    "grab-mouse-pointer": false,
+    "hotkey-show-app": "<Primary>space",
+    "render-on-screen": "mouse-pointer-monitor",
+    "show-indicator-icon": true,
+    "show-recent-apps": "0",
+    "terminal-command": "",
+    "theme-name": "Gruvbox-Dark"
+}
+ENDF
+mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml
+rm -rf ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+mkdir -p ~/.config/xfce4/panel/launcher-7
+killall xfconfd
+cat > ~/.config/xfce4/panel/launcher-7/ulauncher.desktop <<-ENDF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=[ Find ]
+Comment=
+Exec=ulauncher-toggle
+Icon=
+Path=
+Terminal=false
+StartupNotify=false
+ENDF
+
+
+mkdir -p ~/.config/xfce4/panel/launcher-9
+cat > ~/.config/xfce4/panel/launcher-9/terminal.desktop <<-ENDF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=[ Terminal ]
+Comment=
+Exec=xfce4-terminal
+Icon=
+Path=
+Terminal=false
+StartupNotify=false
+ENDF
+
+
+
+
+
+cat > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml <<-ENDF
+<channel name="xfce4-panel" version="1.0">
+<property name="configver" type="int" value="2"/>
+<property name="panels" type="array">
+<value type="int" value="1"/>
+<property name="dark-mode" type="bool" value="true"/>
+<property name="panel-1" type="empty">
+<property name="position" type="string" value="p=8;x=0;y=3000"/>
+<property name="length" type="double" value="100"/>
+<property name="position-locked" type="bool" value="true"/>
+<property name="icon-size" type="uint" value="0"/>
+<property name="size" type="uint" value="36"/>
+<property name="plugin-ids" type="array">
+<value type="int" value="1"/>
+<value type="int" value="7"/>
+<value type="int" value="9"/>
+<value type="int" value="2"/>
+<value type="int" value="3"/>
+<value type="int" value="6"/>
+<value type="int" value="11"/>
+<value type="int" value="12"/>
+<value type="int" value="13"/>
+<value type="int" value="14"/>
+<value type="int" value="8"/>
+</property>
+</property>
+</property>
+<property name="plugins" type="empty">
+<property name="plugin-1" type="string" value="applicationsmenu">
+<property name="show-button-title" type="bool" value="false"/>
+<property name="button-icon" type="string" value="archlinux-logo"/>
+</property>
+<property name="plugin-2" type="string" value="tasklist">
+<property name="grouping" type="uint" value="1"/>
+<property name="show-labels" type="bool" value="false"/>
+</property>
+<property name="plugin-3" type="string" value="separator">
+<property name="expand" type="bool" value="true"/>
+<property name="style" type="uint" value="0"/>
+</property>
+<property name="plugin-6" type="string" value="systray">
+<property name="square-icons" type="bool" value="true"/>
+</property>
+<property name="plugin-11" type="string" value="separator">
+<property name="style" type="uint" value="0"/>
+</property>
+<property name="plugin-12" type="string" value="clock"/>
+<property name="plugin-13" type="string" value="separator">
+<property name="style" type="uint" value="0"/>
+</property>
+<property name="plugin-14" type="string" value="actions"/>
+<property name="plugin-7" type="string" value="launcher">
+<property name="show-label" type="bool" value="true"/>
+<property name="items" type="array">
+<value type="string" value="ulauncher.desktop"/>
+</property>
+</property>
+<property name="plugin-8" type="string" value="showdesktop"/>
+<property name="plugin-9" type="string" value="launcher">
+<property name="show-label" type="bool" value="true"/>
+<property name="items" type="array">
+<value type="string" value="terminal.desktop"/>
+</property>
+</property>
+</property>
+</channel>
+ENDF
+xfce4-panel -r
+rm -f ~/.config/autostart/setthemes.desktop
+rm -f ~/setthemes
+EOM
+
+cat > ~/.config/autostart/setthemes.desktop <<- EOM
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=Script
+Type=Application
+Exec=/bin/bash -c "$HOME/setthemes"
+Icon=
+Terminal=false
+StartupNotify=false
+Hidden=false
+GenericName=
+GenericName[en_US]=
+EOM
+
+chmod +x ~/setthemes
+chmod +x ~/.config/autostart/setthemes.desktop
+exit 0'
+#CREATE SHORTCUT
+echo '
+echo "Running: ArchLinux Xfce"
+(trap "kill 0" SIGINT
+pulseaudio --start --load="module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1" --exit-idle-time=-1
+pd login --user '$username' archlinux --shared-tmp -- /bin/bash -c \
+"export PULSE_SERVER=127.0.0.1
+virgl_test_server_android &
+XDG_RUNTIME_DIR=${TMPDIR} termux-x11 :0 &
+sleep 1
+am start --user 0 -n com.termux.x11/com.termux.x11.MainActivity
+sleep 1
+env DISPLAY=:0 GALLIUM_DRIVER=virpipe MESA_GL_VERSION_OVERRIDE=3.3 startxfce4") > /dev/null 2>&1
+kill 0
+' > ~/../usr/bin/ArchXfce
+mkdir -p ~/.shortcuts
+echo '~/../usr/bin/ArchXfce' >  ~/.shortcuts/ArchXfce
+cat > ~/../usr/bin/RemoveArchXfce <<-EOL
+echo "This is only going to remove shortcut and ArchXfce command."
+read -r -p "Are you sure?[y/N] : " response
+[ "\$response" != "Y" ] && [ "\$response" != "y" ] && echo "Aborting" && exit 1
+rm -rf ~/../usr/bin/ArchXfce
+rm -rf ~/.shortcuts/ArchXfce
+rm -rf ~/../usr/bin/RemoveArchXfce
+rm -rf ~/.shortcuts/RemoveArchXfce
+exit 0
+EOL
+cp -f ~/../usr/bin/RemoveArchXfce ~/.shortcuts/RemoveArchXfce
+chmod +x ~/../usr/bin/RemoveArchXfce
+chmod +x ~/.shortcuts/RemoveArchXfce
+chmod +x ~/../usr/bin/ArchXfce
+chmod +x ~/.shortcuts/ArchXfce
+#Start Distro
+ArchXfce
