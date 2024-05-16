@@ -31,7 +31,7 @@ cp -f /usr/share/applications/ulauncher.desktop ~/.config/autostart/ulauncher.de
 
 mkdir -p ~/.config/nvim
 wget https://raw.githubusercontent.com/nvim-lua/kickstart.nvim/master/init.lua -P ~/.config/nvim
-#INSTALL WINDOW MANAGER THEME
+#DOWNLOAD WINDOW MANAGER THEME
 git clone https://github.com/rafacuevas3/dots-theme
 mkdir -p ~/.themes
 yes | mv -n ~/dots-theme/* ~/.themes
