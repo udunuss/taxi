@@ -1,6 +1,6 @@
 # Termux Archlinux Xfce Installer
 
-### WHAT IT DOES:
+### WHAT IT DOES?
 - Installs proot, proot-distro and arch linux in proot-distro
 - Creates 'ArchXfce' and 'RemoveArchXfce' shortcuts to both /usr/bin and ~/.shortcuts.
 - Installs virgl and starts desktop environment with virgl.
