@@ -4,7 +4,7 @@ echo ""
 read -r -p "Username for archlinux installation: " username </dev/tty
 echo ""
 read -r -p "Password for archlinux installation: " password </dev/tty
-echo "User Name: $username"
+echo "Username: $username"
 echo "Password: $password"
 yes | pkg update
 yes | pkg install tur-repo x11-repo 
