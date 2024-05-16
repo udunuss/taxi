@@ -11,31 +11,35 @@ yes | pkg install tur-repo x11-repo
 yes | pkg update 
 yes | pkg install pulseaudio wget termux-x11-nightly proot proot-distro termux-api virglrenderer-android
 pd install archlinux
+
 #SETUP USER 
 pd login archlinux --shared-tmp -- /bin/bash -c '
 pacman -Syu --noconfirm
 pacman -S sudo --noconfirm --needed
 useradd -Ng wheel --create-home --no-log-init '$username'
 ( echo '$password' ; echo '$password' ) | passwd '$username' 
+
 #DISABLE PASSWORD
 sed -i "s/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/g" /etc/sudoers
 exit 0'
 
 pd login --user $username archlinux --shared-tmp -- /bin/bash -c '
 sudo pacman --noconfirm --needed -S gvfs exo garcon thunar thunar-volman tumbler xfce4-panel xfce4-session xfce4-settings xfce4-terminal xfconf xfdesktop xfwm4 git wget neovim base-devel jq firefox libxml2 mousepad go && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si --noconfirm && yay -S ulauncher --noconfirm ; cd ~/ ; rm -rf ~/yay
-
+#SETUP SHORTCUTS
 mkdir -p ~/Desktop
 cp -f /usr/share/applications/firefox.desktop ~/Desktop/firefox.desktop
 mkdir -p ~/.config/autostart
 cp -f /usr/share/applications/ulauncher.desktop ~/.config/autostart/ulauncher.desktop
-
+#SETUP KICKSTART.NVIM
 mkdir -p ~/.config/nvim
 wget https://raw.githubusercontent.com/nvim-lua/kickstart.nvim/master/init.lua -P ~/.config/nvim
+
 #DOWNLOAD WINDOW MANAGER THEME
 git clone https://github.com/rafacuevas3/dots-theme
 mkdir -p ~/.themes
 yes | mv -n ~/dots-theme/* ~/.themes
 rm -rf ~/dots-theme &
+
 #DOWNLOAD THEME
 git clone https://github.com/Fausto-Korpsvart/Gruvbox-GTK-Theme
 mkdir -p ~/.themes
@@ -45,16 +49,17 @@ yes | mv -n ~/Gruvbox-GTK-Theme/themes/* ~/.themes
 mkdir -p ~/.icons
 yes | mv -n ~/Gruvbox-GTK-Theme/icons/* ~/.icons
 rm -rf ~/Gruvbox-GTK-Theme
+
 #ENABLE PASSWORD
 sed -i "s/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/g" /etc/sudoers
 sed -i "s/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/g" /etc/sudoers
+
 #SET THEMES AND LOOK
 mkdir -p ~/.config/autostart
-
 wget https://gitlab.com/exorcist365/wallpapers/-/raw/master/gruvbox/pacman-ghosts.jpg -O /usr/share/backgrounds/pacman.jpg
 mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml
 rm -rf ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
-cat > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml <<-ENDOFLINE
+cat > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml <<-ENDF
 <?xml version="1.0" encoding="UTF-8"?>
 <channel name="xfce4-desktop" version="1.0">
 <property name="backdrop" type="empty">
@@ -78,11 +83,11 @@ cat > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml <<-ENDOFLINE
 </property>
 </property>
 </channel>
-ENDOFLINE
+ENDF
 
 
 
-cat > ~/setthemes <<-EOM
+cat > ~/setthemes <<-ENDOFFILE
 xfconf-query -c xfwm4 -p /general/theme -s "Dots Black"
 xfconf-query -c xsettings -p /Net/ThemeName -s "Gruvbox-Dark-BL"
 xfconf-query -c xsettings -p /Net/IconThemeName -s "Gruvbox_Dark"
@@ -217,9 +222,9 @@ ENDF
 xfce4-panel -r
 rm -f ~/.config/autostart/setthemes.desktop
 rm -f ~/setthemes
-EOM
+ENDOFFILE
 
-cat > ~/.config/autostart/setthemes.desktop <<- EOM
+cat > ~/.config/autostart/setthemes.desktop <<-ENDF
 [Desktop Entry]
 Version=1.0
 Encoding=UTF-8
@@ -232,7 +237,7 @@ StartupNotify=false
 Hidden=false
 GenericName=
 GenericName[en_US]=
-EOM
+ENDF
 
 chmod +x ~/setthemes
 chmod +x ~/.config/autostart/setthemes.desktop
@@ -254,7 +259,7 @@ kill 0
 ' > ~/../usr/bin/ArchXfce
 mkdir -p ~/.shortcuts
 echo '~/../usr/bin/ArchXfce' >  ~/.shortcuts/ArchXfce
-cat > ~/../usr/bin/RemoveArchXfce <<-EOL
+cat > ~/../usr/bin/RemoveArchXfce <<-EOF
 echo "This is only going to remove shortcut and ArchXfce command."
 read -r -p "Are you sure?[y/N] : " response
 [ "\$response" != "Y" ] && [ "\$response" != "y" ] && echo "Aborting" && exit 1
@@ -263,7 +268,7 @@ rm -rf ~/.shortcuts/ArchXfce
 rm -rf ~/../usr/bin/RemoveArchXfce
 rm -rf ~/.shortcuts/RemoveArchXfce
 exit 0
-EOL
+EOF
 cp -f ~/../usr/bin/RemoveArchXfce ~/.shortcuts/RemoveArchXfce
 chmod +x ~/../usr/bin/RemoveArchXfce
 chmod +x ~/.shortcuts/RemoveArchXfce
