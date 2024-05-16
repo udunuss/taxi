@@ -4,7 +4,7 @@
 - Installs proot, proot-distro and arch linux in proot-distro
 - Creates 'ArchXfce' and 'RemoveArchXfce' shortcuts to both /usr/bin and ~/.shortcuts.
 - Installs virgl and starts desktop environment with virgl.
-- Replaces xfce4-appfinder by [ulauncher](https://ulauncher.io/](https://github.com/Ulauncher/Ulauncher/).
+- Replaces xfce4-appfinder by [ulauncher](https://github.com/Ulauncher/Ulauncher/).
 - Installs nvim with [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim).
 - Installs firefox.
 - Installs [Dots](https://github.com/rafacuevas3/dots-theme) Window Manager style and [Gruvbox](https://github.com/Fausto-Korpsvart/Gruvbox-GTK-Theme) theme.
