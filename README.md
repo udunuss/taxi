@@ -1,4 +1,4 @@
-# taxi
+# TAXI
 
 ### WHAT IT DOES:
 - Installs proot, proot-distro and arch linux in proot-distro
