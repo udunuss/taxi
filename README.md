@@ -13,7 +13,7 @@
 - Adds [find](toggles ulauncher) , [terminal] and desktop shortcuts to panel 1.
 - Adds firefox shortcut to desktop.
 
-## Install:
+## Installation:
 ```yes | pkg update && yes | pkg install wget && wget https://raw.githubusercontent.com/udunuss/taxi/main/TAXI && chmod +x ./TAXI && ./TAXI ```
 
 
